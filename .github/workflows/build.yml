@@ -13,13 +13,11 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      # 1. TỰ ĐỘNG GIẢI NÉN MỌI FILE .ZIP TRONG REPOSITORY
+      # 1. GIẢI NÉN FILE ZIP
       - name: Unzip Project File
         run: |
-          echo "Finding and unzipping archive..."
+          echo "Unzipping archive..."
           unzip -o "*.zip"
-          # Tìm file gradlew trong thư mục gốc hoặc thư mục con và cấp quyền thực thi
-          find . -name "gradlew" -exec chmod +x {} +
 
       # 2. CÀI ĐẶT MÔI TRƯỜNG JAVA 21
       - name: Set up JDK 21
@@ -28,21 +26,16 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
 
-      # 3. CÀI ĐẶT GRADLE
+      # 3. CÀI ĐẶT GRADLE TỰ ĐỘNG (KHÔNG CẦN GRADLEW CÓ SẴN)
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
 
-      # 4. CHẠY LỆNH BUILD BIÊN DỊCH MOD
+      # 4. TỰ TẠO WRAPPER VÀ BIÊN DỊCH MOD
       - name: Build Mod with Gradle
         run: |
-          if [ -f "./gradlew" ]; then
-            ./gradlew build --no-daemon
-          else
-            # Trường hợp giải nén ra thư mục con, tự di chuyển vào để build
-            cd $(find . -maxdepth 2 -name "build.gradle" -exec dirname {} \;)
-            chmod +x gradlew
-            ./gradlew build --no-daemon
-          fi
+          gradle wrapper
+          chmod +x gradlew
+          ./gradlew build --no-daemon
 
       # 5. XUẤT FILE .JAR ĐỂ TẢI VỀ
       - name: Upload Mod Jar Artifact
